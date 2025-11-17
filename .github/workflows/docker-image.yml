@@ -14,10 +14,24 @@ jobs:
     env: 
       image_name: fastapi-simple:$(date +%s)
     steps:
-    - uses: actions/checkout@v4
-    - name: Build the Docker image
+    - uses: actions/checkout@v5
+    - name: Build image
       run: docker build . --file Dockerfile --tag ${{env.image_name}}
     - name: Sign in to Container registry
-      run: echo $secrets.PACKAGE_PAT | docker login ghcr.io -u esmailbenmoussa --password-stdin
+      run: echo $secrets.PACKAGE_PAT | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
     - name: Push the Docker image to GitHub Package
-      run: docker push ghcr.io/esmailbenmoussa/${{env.image_name}}:latest
+      run: |
+          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/${{env.image_name}}
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          
+
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+
+          [ "$VERSION" == "main" ] && VERSION=latest
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+          docker tag ${{env.image_name}} $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
