@@ -18,6 +18,6 @@ jobs:
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag ${{env.image_name}}
     - name: Sign in to Container registry
-      run: echo $secrets.PACKAGE_PAT | docker login ghcr.io -u USERNAME --password-stdin
+      run: echo $secrets.PACKAGE_PAT | docker login ghcr.io -u esmailbenmoussa --password-stdin
     - name: Push the Docker image to GitHub Package
       run: docker push ghcr.io/esmailbenmoussa/${{env.image_name}}:latest
