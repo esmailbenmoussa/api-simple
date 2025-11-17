@@ -1,0 +1,23 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+    env: 
+      image_name: fastapi-simple:$(date +%s)
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag ${{env.image_name}}
+    - name: Sign in to Container registry
+      run: echo $secrets.PACKAGE_PAT | docker login ghcr.io -u USERNAME --password-stdin
+    - name: Push the Docker image to GitHub Package
+      run: docker push ghcr.io/esmailbenmoussa/${{env.image_name}}:latest
